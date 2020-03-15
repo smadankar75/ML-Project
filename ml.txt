@@ -1,0 +1,83 @@
+import pandas as pd,numpy as np,re,statistics as st
+df=pd.read_excel("D:\\Toshit1\\Desktop ml\\MLProject_JUNCK.xlsx")
+from sklearn import preprocessing
+from scipy import stats as s
+import matplotlib.pyplot as plt
+df1=pd.DataFrame()
+df2=pd.DataFrame()
+for col in df.columns:
+columnType=df[col].dtype
+null=df[col].isnull().sum()
+if null>0 and columnType ==np.float64 :
+df1[col] = df[col].fillna((df[col].mean()))
+else:
+df1[col]=df[col]
+if null>0 and columnType ==object :
+df1[col] = df[col].replace(to_replace=np.nan, value=st.mode(df[col]))
+sp = s.mode(df[col])[0]
+for a in sp:
+df1[col] = df[col].replace(to_replace=np.nan, value=a)
+if columnType == object:
+df1[col] = df1[col].map(lambda x: re.sub(r'\W+', '', x))
+df2[col] = df1[col]
+df1.drop([col], axis=1, inplace=True)
+# print("Df2 Clean Data\n", df2)
+#df2.to_excel("C:\\Users\\kevin\\Desktop\\Book2_with_name.xlsx") # for seve data in the given location
+#pre processing
+'''
+It is use for transform string to int for applying ml model
+'''
+l_encoder = preprocessing.LabelEncoder() # New object
+df3=pd.DataFrame(df2)
+# Now for the easy part
+df4=df3.apply(l_encoder.fit_transform)
+# DATA SPliting
+y=df4.Item_Outlet_Sales # Target OR Dependent Variable
+#print(y)
+#x=df4[['Fat_Content','Outlet_Size','Outlet_Location_Type','ProductCategory','Outlet_Type']] # IN Dependent Variable
+x=df4.drop("Item_Outlet_Sales",axis=1)
+#print("inDependent Variable",x)
+# Data spliting
+from sklearn.model_selection import train_test_split
+x_train,x_test,y_train,y_test=train_test_split(x,y,test_size=0.2)
+from sklearn import datasets,linear_model
+lm=linear_model.LinearRegression()
+#print("lm",lm)
+lm.fit(x_train,y_train) # b4 we teck input then torget
+dftest=pd.DataFrame(x_test)
+#print("dftest",dftest.head())
+ycap=lm.predict(x_test)
+dftest['ycap']=ycap
+#print("dftest",dftest)
+#cross validation
+#
+from sklearn.model_selection import cross_val_predict,cross_val_score
+crss=cross_val_predict(lm,df4,y,cv=2) # cv= cv is the number of check in
+# #print("crss",crss)
+# #print("length",len(crss))
+crss_core=cross_val_score(lm,df4,y,cv=4)
+# #print("crss_core",crss_core)
+# #print("cross validation",crss)
+# model Validation
+def accuracy(y,ycap,cl):
+d=abs(y-ycap)/y*100
+de=100-cl
+pcnt=0
+for v in d.ravel():
+if v<=de:
+pcnt+=1
+l=d.size
+acc = (pcnt/len(y))*100
+return acc
+acr=accuracy(y_test,dftest['ycap'],80)
+print(acr)
+## Recomendaction
+plt.scatter(df4["Outlet_Location_Type"],df4["ProductCategory"]) # x,y
+plt.xlabel("Location")
+plt.ylabel("ProductCategor")
+#plt.show()
+from sklearn.cluster import KMeans
+km=KMeans(n_clusters=3)
+ycap=km.fit_predict(df4[['Outlet_Location_Type','ProductCategory']])
+#print("ycap",ycap)
+df2["ycap"]=ycap
