@@ -1,5 +1,5 @@
 import pandas as pd,numpy as np,re,statistics as st
-df=pd.read_excel("D:\\Toshit1\\Desktop ml\\MLProject_JUNCK.xlsx")
+df=pd.read_excel("F:\\Sagar\\MLProject_JUNCK.xlsx")
 from sklearn import preprocessing
 from scipy import stats as s
 import matplotlib.pyplot as plt
@@ -22,7 +22,7 @@ df1[col] = df1[col].map(lambda x: re.sub(r'\W+', '', x))
 df2[col] = df1[col]
 df1.drop([col], axis=1, inplace=True)
 # print("Df2 Clean Data\n", df2)
-#df2.to_excel("C:\\Users\\kevin\\Desktop\\Book2_with_name.xlsx") # for seve data in the given location
+#df2.to_excel("F:\\Sagar\\MLProject_JUNCK.xlsx\\Book2_with_name.xlsx") # for seve data in the given location
 #pre processing
 '''
 It is use for transform string to int for applying ml model
